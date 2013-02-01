@@ -1,56 +1,33 @@
 #main-container.container-fluid
-  #main-row.row-fluid
-    <!-- Library -->
-    #library.span6
-      .container-fluid{'ng-controller' => 'LibraryController'}
-        %input{'ng-model' => 'query'}
-        %table.table-striped.table-hover
-          %thead
-            %th
-            %th
-              Name
-            %th
-              Artist
-          %tr{'ng-repeat' => 'song in songs | filter:query'}
-            %td
-              =iconlink('addbtn', 'icon-plus-sign', 'addToPlaylist(song.index)')
-            %td
-              {{song.name}}
-            %td
-              {{song.artist}}
+  #queue.row-fluid
+    .span6.offset3
+      Queue
 
-    <!-- Player -->
-    #player.span6
-      .container-fluid{'ng-controller' => 'PlayerController'}
-        .row-fluid{'ng-controller' => 'PlaylistController', 'ng-show' => 'visible'}
-          #playlist.span12
-            %h3
-              Playlist
-            =iconlink('startplaylist', 'icon-play', 'startPlaylist()')
-            %table.table-striped.table-hover
-              %thead
-                %th
-                %th
-                  Name
-                %th
-                  Artist
-              %tr{'ng-repeat' => 'song in playlist'}
-                %td
-                  =iconlink('addbtn', 'icon-minus-sign', 'addToPlaylist($index)')
-                %td
-                  {{song.name}}
-                %td
-                  {{song.artist}}
+  #player{'ng-controller' => 'PlayerController'}
+    #name.row-fluid
+      .span12
+        {{audio.track.artist}} – {{audio.track.name}}
 
-        .row-fluid{'ng-controller' => 'EqualizerController', 'ng-show' => 'visible'}
-          #equalizer.span12
-            %h3
-              Equalizer
-            %canvas#fft
-        .row-fluid{'ng-controller' => 'PlaybackController',}
-          #playback.span12
-            %h2
-              {{song.full_name()}}
-            %p
-              =iconlink('playlistbtn', 'icon-list', 'showPlaylist()')
-              =iconlink('equalizerbtn', 'icon-cog', 'showEqualizer()')
+    #controls.row-fluid
+      .span4.offset4
+        %a{:href => "#", :id => "btn_previous", 'ng-click' => "previous"}
+          %i.icon-fast-backward
+        %a{:href => "#", :id => "btn_resume", 'ng-click' => "resume()", 'ng-hide' => 'audio.playing'}
+          %i.icon-play
+        %a{:href => "#", :id => "btn_pause", 'ng-click' => "pause()", 'ng-hide' => '!audio.playing'}
+          %i.icon-pause
+        %a{:href => "#", :id => "btn_next", 'ng-click' => "next"}
+          %i.icon-fast-forward
+
+
+    #visualizer.row-fluid
+      .span12
+        %canvas#fft
+
+    #progress.row-fluid
+      .span12
+        %canvas#progressbar
+
+  #library.row-fluid
+    .span6.offset3
+      Library

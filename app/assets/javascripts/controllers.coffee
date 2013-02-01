@@ -1,67 +1,74 @@
-@LibraryController = ($scope, $rootScope, $http) ->
-  $scope.addToPlaylist = (index) ->
-    song = $scope.songs[index]
-    $rootScope.$broadcast('add-song-playlist', new Song(song.url, song.name, song.artist))
+@PlayerController = ($scope, $rootScope) ->
+  $scope.audio = null
 
-  $http.get('/songs.json').success (data) ->
-    $scope.songs = data
-    for song, index in $scope.songs
-      song.index = index
+  $rootScope.$on 'play-track', (event, track) ->
+    $scope.$apply () ->
+      $scope.audio = new Audio(track)
+      $scope.audio.load($scope)
 
-@PlayerController = ($scope) ->
+  $scope.$on 'loaded', () ->
+    $scope.$apply () ->
+      $scope.audio.playing = true
 
-@PlaylistController = ($scope, $rootScope) ->
-  start_song = () -> 
-    $rootScope.$broadcast('start-song', $scope.playlist[$scope.current])
+  $scope.resume = () ->
+    if $scope.audio
+        $scope.audio.resume()
 
-  $scope.visible = false
-  $scope.playlist = []
-  $scope.current = 0
+  $scope.pause = () ->
+    if $scope.audio
+        $scope.audio.pause()
 
-  $scope.startPlaylist = () -> start_song()
+  render_progress = () ->
+    requestAnimFrame(render_progress)
 
-  $rootScope.$on 'show-playlist', () ->
-    $scope.visible = true
-
-  $rootScope.$on 'add-song-playlist', (event, song) ->
-    $scope.playlist.push(song)
-    console.log("Song #{song.name} added to playlist")
-
-  $rootScope.$on 'song-ended', () ->
-    ++$scope.current
-    if ($scope.current is $scope.playlist.length)
-      $scope.current = 0
+    if $scope.audio is null or not $scope.audio.playing
       return
-    else
-      start_song()
 
-@EqualizerController = ($scope, $rootScope) ->
-  $scope.visible = false
+    duration = $scope.audio.source.buffer.duration
+    current = $scope.audio.context.currentTime
 
-  $rootScope.$on 'show-equalizer', () ->
-    $scope.visible = true
+    canvas = document.getElementById('progressbar')
+    context = canvas.getContext('2d')
 
-@PlaybackController = ($scope, $rootScope) ->
-  $scope.showPlaylist = () ->
-    $rootScope.$broadcast('show-playlist')
+    width = canvas.width * current / duration
 
-  $scope.showEqualizer = () ->
-    $rootScope.$broadcast('show-equalizer')
+    context.fillRect(0, 0, width, canvas.height)
 
-  $rootScope.$on 'start-song', (event, song) ->
-    console.log(song)
-    $scope.song = song
-    #$scope.$digest()
-    console.log("let's play #{song.name} by #{song.artist}")
-    $scope.audio = new Audio(song.url)
-    $scope.audio.load()
+  render_fft = () ->
+    requestAnimFrame(render_fft)
 
-  $('audio').on('ended', () -> $rootScope.$broadcast('song-ended'))
+    if $scope.audio is null or not $scope.audio.playing
+      return
 
+    num_bars = 60
 
-# Explicit dependency injections for minification
-LibraryController.$inject = ['$scope', '$rootScope', '$http']
-PlayerController.$inject = ['$scope']
-PlaylistController.$inject = ['$scope', '$rootScope']
-EqualizerController.$inject = ['$scope', '$rootScope']
-PlaybackController.$inject = ['$scope', '$rootScope']
+    canvas = document.getElementById('fft')
+    context = canvas.getContext('2d')
+    analyzer = $scope.audio.analyzer
+
+    data = new Uint8Array(analyzer.fftSize)
+    analyzer.getByteFrequencyData(data)
+
+    context.clearRect(0, 0, canvas.width, canvas.height)
+
+    bar_width = canvas.width / num_bars
+    bin_size = Math.floor(data.length / num_bars / 2.2)
+    for i in [0...num_bars]
+      sum = 0
+      for j in [0...bin_size]
+        sum += data[j + i * bin_size]
+
+      average = sum / bin_size
+      scaled = average / 256 * canvas.height
+      context.fillRect(i * bar_width, canvas.height, bar_width - 2, -scaled)
+
+  render_fft()
+  render_progress()
+
+  # just for testing
+  $(document).ready () ->
+    $rootScope.$broadcast('play-track', new Track({
+      url: "http://localhost:8080/DAFT%20PUNK/ALIVE%20SUMMER%202006/05%20Around%20The%20World%20_%20Harder%20Better%20Faster%20Stronger.mp3",
+      name: "Around the world",
+      artist: "Daft Punk"
+    }))

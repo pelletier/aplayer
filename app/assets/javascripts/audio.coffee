@@ -7,44 +7,63 @@ class Node
     @sync = 0
 
 class @Audio
-  constructor: (@url) ->
+  constructor: (@track) ->
+    @url = @track.url
     @context = new webkitAudioContext()
     @source = @context.createBufferSource()
     @analyzer = @context.createAnalyser()
-    @analyzer.fftsize = 1024
+    @analyzer.fftSize = 2048
+    @loaded = false
+    @playing = false
+    @currentTime = 0.0
 
     # Append the analyzer to the source
     @source.connect(@analyzer)
     @analyzer.connect(@context.destination)
 
-  load: () ->
+  pause: () ->
+    @playing = false
+    @currentTime = @context.currentTime
+    @source.disconnect()
+
+  stop: () ->
+    this.pause()
+    @currentTime = 0.0
+
+  resume: () ->
+    @playing = true
+    @source.connect(@analyzer)
+    @source.noteOn(@currentTime)
+
+  load: ($scope) ->
     audio = this
     request = new XMLHttpRequest()
     request.open("GET", @url, true)
     request.responseType = "arraybuffer"
 
     request.onload = () ->
-      @audioBuffer = audio.audio_decode(request.response)
+      @audioBuffer = audio.audio_decode(request.response, $scope)
     request.onerror = () ->
       console.log("XHR error")
     request.send()
 
-  audio_decode: (data) ->
+  audio_decode: (data, $scope) ->
     audio = this
     @context.decodeAudioData(data,
       (buffer) ->
-        console.log("buffer")
-        console.log(buffer)
         audio.source.buffer = buffer
         audio.source.loop = true
         audio.source.noteOn(0.0)
+        audio.playing = true
+        audio.loaded = true
+        $scope.$broadcast('loaded')
       (error) ->
         console.log("fuu")
         console.log(error)
         node = new Node(data)
-        if sync_stream(node)
+        if audio.sync_stream(node)
           console.log("stream synchronized")
-          audio.audio_decode(node.buffer)
+          audio.audio_decode(node.buffer, $scope)
         else
           console.log("Unable to sync stream"))
 
