@@ -9,7 +9,6 @@ gem 'sqlite3'
 gem 'haml'
 gem 'sass'
 gem 'font-awesome-rails'
-gem 'id3lib-ruby'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -39,3 +38,4 @@ gem 'jquery-rails'
 
 # To use debugger
 # gem 'debugger'
+gem 'heroku'
