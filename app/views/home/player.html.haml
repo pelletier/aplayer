@@ -28,6 +28,11 @@
       .span12
         %canvas#progressbar
 
-  #library.row-fluid
+  #library.row-fluid{'ng-controller' => 'LibraryController'}
     .span6.offset3
-      Library
+      %input.input-block-level.search-query{:type => 'text', 'ng-model' => 'query', :placeholder => 'Filter the library'}
+
+      %ul
+        %li{'ng-repeat' => 'song in songs | filter:query'}
+          %a
+            {{song.artist}} – {{song.name}}

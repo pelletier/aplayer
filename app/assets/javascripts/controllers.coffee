@@ -72,3 +72,11 @@
       name: "Around the world",
       artist: "Daft Punk"
     }))
+
+@LibraryController = ($scope, $rootScope, $http) ->
+  $scope.songs = []
+
+  $http.get('/songs.json').success (data) ->
+    $scope.songs = data
+    for song, index in $scope.songs
+      song.index = index

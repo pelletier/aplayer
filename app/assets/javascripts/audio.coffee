@@ -56,6 +56,7 @@ class @Audio
         audio.source.noteOn(0.0)
         audio.playing = true
         audio.loaded = true
+        audio.source.gain.loop = false
         $scope.$broadcast('loaded')
       (error) ->
         console.log("fuu")
