@@ -1,7 +1,11 @@
 #main-container.container-fluid
-  #queue.row-fluid
+  #queue.row-fluid{'ng-controller' => 'QueueController'}
     .span6.offset3
-      Queue
+
+      %ul
+        %li{'ng-repeat' => "song in songs | orderBy:'index':true"}
+          {{song.artist}} – {{song.name}}
+
 
   #player{'ng-controller' => 'PlayerController'}
     #name.row-fluid
@@ -34,5 +38,5 @@
 
       %ul
         %li{'ng-repeat' => 'song in songs | filter:query'}
-          %a
+          %a{'ng-click' => 'enqueue(song.index)'}
             {{song.artist}} – {{song.name}}

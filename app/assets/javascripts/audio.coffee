@@ -52,7 +52,7 @@ class @Audio
     @context.decodeAudioData(data,
       (buffer) ->
         audio.source.buffer = buffer
-        audio.source.loop = true
+        audio.source.loop = false
         audio.source.noteOn(0.0)
         audio.playing = true
         audio.loaded = true

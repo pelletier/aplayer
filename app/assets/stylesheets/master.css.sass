@@ -1,12 +1,14 @@
-html, body, #main-container
+html
   height: 100%
 
 body
+  height: 90%
   padding-top: 2em
 
 #main-container
   text-align: center
   font-size: 1.1em
+  height: 100%
 
   .row-fluid
     margin-bottom: 2em
@@ -23,7 +25,9 @@ body
       font-size: 2em
 
   #queue
-    min-height: 15%
+    height: 15%
+    max-height: 15%
+    overflow: scroll
 
   #library
     min-height: 15%
@@ -62,3 +66,14 @@ body
             color: inherit
             background: #EEE
             text-decoration: none
+
+
+// For the display of queue's scrollbar, because of OS X users who have disabled them
+::-webkit-scrollbar
+  -webkit-appearance: none
+  width: 7px
+
+::-webkit-scrollbar-thumb
+  border-radius: 4px
+  background-color: rgba(0,0,0,.5)
+  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5)
