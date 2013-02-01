@@ -113,7 +113,6 @@
       $scope.songs.push(track)
 
   $rootScope.$on 'finished-playback', (event) ->
-    console.log('finished')
     if $scope.songs.length > 0
       track = $scope.songs[0]
       $scope.songs.shift()
